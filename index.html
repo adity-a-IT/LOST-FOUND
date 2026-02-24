@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Lost & Found</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar" id="navbar" style="display: none;">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">🔍</span>
+                <span class="brand-text">Lost & Found</span>
+            </div>
+            <button class="menu-toggle" id="menuToggle">☰</button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#home" class="nav-link" data-page="home">Home</a></li>
+                <li><a href="#report-lost" class="nav-link" data-page="report-lost">Report Lost</a></li>
+                <li><a href="#report-found" class="nav-link" data-page="report-found">Report Found</a></li>
+                <li><a href="#search" class="nav-link" data-page="search">Search Items</a></li>
+                <li id="adminMenuLink"><a href="#admin" class="nav-link" data-page="admin">Admin Dashboard</a></li>
+                <li><button class="btn btn-logout" id="logoutBtn" onclick="logout()">Logout</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Notification Banner -->
+    <div class="notification-banner" id="notificationBanner">
+        <span class="notification-text" id="notificationText"></span>
+        <button class="notification-close" onclick="closeNotification()">×</button>
+    </div>
+
+    <!-- Login Page -->
+    <div class="login-wrapper" id="loginWrapper">
+        <div class="login-container">
+            <div class="login-box">
+                <div class="login-header">
+                    <h1>🔍 Lost & Found</h1>
+                    <p>University System</p>
+                </div>
+
+                <div class="login-tabs">
+                    <button class="login-tab active" id="studentTabBtn" onclick="switchLoginTab('student')">Student Login</button>
+                    <button class="login-tab" id="adminTabBtn" onclick="switchLoginTab('admin')">Admin Login</button>
+                </div>
+
+                <!-- Student Login Form -->
+                <form id="studentLoginForm" class="login-form active" onsubmit="handleStudentLogin(event)">
+                    <div class="form-group">
+                        <label for="studentEmail">Email Address</label>
+                        <input type="email" id="studentEmail" placeholder="student@university.edu" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentPassword">Password</label>
+                        <input type="password" id="studentPassword" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-login">Login</button>
+                </form>
+
+                <!-- Admin Login Form -->
+                <form id="adminLoginForm" class="login-form" onsubmit="handleAdminLogin(event)">
+                    <div class="form-group">
+                        <label for="adminEmail">Admin Email</label>
+                        <input type="email" id="adminEmail" placeholder="admin@university.edu" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPassword">Password</label>
+                        <input type="password" id="adminPassword" placeholder="Enter admin password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-login">Admin Login</button>
+                </form>
+
+                <div class="login-footer">
+                    <p>Login with any credentials:</p>
+                    <small>Student: Enter any email and password</small><br>
+                    <small>Admin: Enter any email and password</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Home Page -->
+        <section id="home" class="page active">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1>🔍 University Lost & Found</h1>
+                    <p>Reunite lost items with their owners. Help your campus community!</p>
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <span class="stat-value" id="heroTotalItems">0</span>
+                            <span class="stat-label">Total Items</span>
+                        </div>
+                        <div class="hero-stat">
+                            <span class="stat-value" id="heroLostItems">0</span>
+                            <span class="stat-label">Lost</span>
+                        </div>
+                        <div class="hero-stat">
+                            <span class="stat-value" id="heroFoundItems">0</span>
+                            <span class="stat-label">Found</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <div class="action-card" onclick="switchPage('report-lost')">
+                    <div class="card-icon">📋</div>
+                    <h3>Report Lost Item</h3>
+                    <p>If you've lost something, let us know and we'll help you find it</p>
+                    <button class="btn btn-primary">Report Now</button>
+                </div>
+                <div class="action-card" onclick="switchPage('report-found')">
+                    <div class="card-icon">✓</div>
+                    <h3>Report Found Item</h3>
+                    <p>Found something? Report it here to help reunite items with owners</p>
+                    <button class="btn btn-success">Report Now</button>
+                </div>
+                <div class="action-card" onclick="switchPage('search')">
+                    <div class="card-icon">🔍</div>
+                    <h3>Search Items</h3>
+                    <p>Browse all lost and found items and search for your belongings</p>
+                    <button class="btn btn-secondary">Search Now</button>
+                </div>
+            </div>
+
+            <!-- Recently Added Section -->
+            <section class="recently-added">
+                <div class="section-header">
+                    <h2>Recently Added Items</h2>
+                    <p class="section-subtitle">Latest reports from the campus community</p>
+                </div>
+                <div class="items-grid" id="recentlyAddedGrid">
+                    <!-- Items will be populated here -->
+                </div>
+            </section>
+        </section>
+
+        <!-- Report Lost Item Page -->
+        <section id="report-lost" class="page">
+            <div class="form-container">
+                <h2>Report a Lost Item</h2>
+                <form id="lostItemForm" class="item-form">
+                    <div class="form-group">
+                        <label for="lostItemName">Item Name *</label>
+                        <input type="text" id="lostItemName" name="itemName" placeholder="e.g., Blue Backpack" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lostCategory">Category *</label>
+                        <select id="lostCategory" name="category" required>
+                            <option value="">Select a category</option>
+                            <option value="electronics">Electronics</option>
+                            <option value="books">Books & Documents</option>
+                            <option value="clothing">Clothing & Accessories</option>
+                            <option value="personal">Personal Items</option>
+                            <option value="sports">Sports Equipment</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lostDescription">Description *</label>
+                        <textarea id="lostDescription" name="description" placeholder="Provide details about the item..." rows="4" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="lostLocation">Location Lost *</label>
+                            <input type="text" id="lostLocation" name="location" placeholder="e.g., Library, Building A" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lostDate">Date Lost *</label>
+                            <input type="date" id="lostDate" name="date" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lostImage">Upload Image</label>
+                        <input type="file" id="lostImage" name="image" accept="image/*">
+                        <div class="image-preview" id="lostImagePreview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lostContact">Contact Email/Phone *</label>
+                        <input type="text" id="lostContact" name="contact" placeholder="email@university.edu or phone" required>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-primary">Submit Lost Item</button>
+                        <button type="reset" class="btn btn-secondary">Clear Form</button>
+                    </div>
+
+                    <!-- Matching System -->
+                    <div id="lostMatches" class="matches-section" style="display: none;">
+                        <h3>🎯 Suggested Matches</h3>
+                        <p class="matches-subtitle">Found items that might match your lost item:</p>
+                        <div id="lostMatchesGrid" class="items-grid"></div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Report Found Item Page -->
+        <section id="report-found" class="page">
+            <div class="form-container">
+                <h2>Report a Found Item</h2>
+                <form id="foundItemForm" class="item-form">
+                    <div class="form-group">
+                        <label for="foundItemName">Item Name *</label>
+                        <input type="text" id="foundItemName" name="itemName" placeholder="e.g., Red Wallet" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="foundCategory">Category *</label>
+                        <select id="foundCategory" name="category" required>
+                            <option value="">Select a category</option>
+                            <option value="electronics">Electronics</option>
+                            <option value="books">Books & Documents</option>
+                            <option value="clothing">Clothing & Accessories</option>
+                            <option value="personal">Personal Items</option>
+                            <option value="sports">Sports Equipment</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="foundDescription">Description *</label>
+                        <textarea id="foundDescription" name="description" placeholder="Provide details about the item..." rows="4" required></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="foundLocation">Location Found *</label>
+                            <input type="text" id="foundLocation" name="location" placeholder="e.g., Cafeteria, Parking Lot" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="foundDate">Date Found *</label>
+                            <input type="date" id="foundDate" name="date" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="foundImage">Upload Image</label>
+                        <input type="file" id="foundImage" name="image" accept="image/*">
+                        <div class="image-preview" id="foundImagePreview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="foundContact">Contact Email/Phone *</label>
+                        <input type="text" id="foundContact" name="contact" placeholder="email@university.edu or phone" required>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="btn btn-success">Submit Found Item</button>
+                        <button type="reset" class="btn btn-secondary">Clear Form</button>
+                    </div>
+
+                    <!-- Matching System -->
+                    <div id="foundMatches" class="matches-section" style="display: none;">
+                        <h3>🎯 Suggested Matches</h3>
+                        <p class="matches-subtitle">Lost items that might match your found item:</p>
+                        <div id="foundMatchesGrid" class="items-grid"></div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Search & Filter Page -->
+        <section id="search" class="page">
+            <div class="search-container">
+                <div class="search-header">
+                    <h2>🔍 Search Lost & Found Items</h2>
+                    <p class="search-subtitle">Find lost or found items using our advanced search and filters</p>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search by item name, description..." class="search-input" onkeypress="if(event.key==='Enter')performSearch()">
+                    <button class="btn btn-primary" onclick="performSearch()">🔍 Search</button>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters-section">
+                    <div class="filters-header">
+                        <h3>Advanced Filters</h3>
+                        <button class="btn btn-secondary btn-small" onclick="clearFilters()">✕ Clear All</button>
+                    </div>
+
+                    <div class="filters-grid">
+                        <!-- Status Filter -->
+                        <div class="filter-group">
+                            <label for="filterStatus">Status:</label>
+                            <select id="filterStatus" onchange="applyFilters()">
+                                <option value="">All Items</option>
+                                <option value="lost">Lost Items Only</option>
+                                <option value="found">Found Items Only</option>
+                                <option value="resolved">Resolved Items</option>
+                            </select>
+                        </div>
+
+                        <!-- Category Filter -->
+                        <div class="filter-group">
+                            <label for="filterCategory">Category:</label>
+                            <select id="filterCategory" onchange="applyFilters()">
+                                <option value="">All Categories</option>
+                                <option value="electronics">📱 Electronics</option>
+                                <option value="books">📚 Books & Documents</option>
+                                <option value="clothing">👕 Clothing & Accessories</option>
+                                <option value="personal">👜 Personal Items</option>
+                                <option value="sports">⚽ Sports Equipment</option>
+                                <option value="other">📦 Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Location Filter -->
+                        <div class="filter-group">
+                            <label for="filterLocation">Location:</label>
+                            <input type="text" id="filterLocation" placeholder="e.g., Library, Building A..." onchange="applyFilters()" oninput="applyFilters()">
+                        </div>
+
+                        <!-- Quick Date Range -->
+                        <div class="filter-group">
+                            <label for="filterDateRange">Quick Date:</label>
+                            <select id="filterDateRange" onchange="handleDateRangeChange()">
+                                <option value="">Any Time</option>
+                                <option value="1">Last 24 Hours</option>
+                                <option value="7">Last 7 Days</option>
+                                <option value="30">Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Custom Date Range (Hidden by default) -->
+                    <div id="customDateRange" class="custom-date-range" style="display: none;">
+                        <h4>Custom Date Range</h4>
+                        <div class="date-range-inputs">
+                            <div class="filter-group">
+                                <label for="filterStartDate">From Date:</label>
+                                <input type="date" id="filterStartDate" onchange="applyFilters()">
+                            </div>
+                            <div class="filter-group">
+                                <label for="filterEndDate">To Date:</label>
+                                <input type="date" id="filterEndDate" onchange="applyFilters()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div class="results-section">
+                    <h3 id="resultsTitle">All Items</h3>
+                    <div class="items-grid" id="searchResultsGrid">
+                        <!-- Items will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Dashboard Page -->
+        <section id="admin" class="page">
+            <div class="admin-container">
+                <h2>Admin Dashboard</h2>
+
+                <!-- Admin Stats -->
+                <div class="admin-stats">
+                    <div class="stat-card">
+                        <h4>Total Items</h4>
+                        <p id="totalItemsCount" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Lost Items</h4>
+                        <p id="lostItemsCount" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Found Items</h4>
+                        <p id="foundItemsCount" class="stat-number">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Resolved</h4>
+                        <p id="resolvedItemsCount" class="stat-number">0</p>
+                    </div>
+                </div>
+
+                <!-- Admin Controls -->
+                <div class="admin-controls">
+                    <button class="btn btn-secondary" onclick="downloadReport()">📥 Download Report</button>
+                </div>
+
+                <!-- Admin Table -->
+                <div class="admin-table-container">
+                    <table class="admin-table" id="adminTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Item Name</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Location</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody">
+                            <!-- Items will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeEditModal()">&times;</span>
+            <h3>Edit Item</h3>
+            <form id="editForm">
+                <input type="hidden" id="editItemId">
+                <div class="form-group">
+                    <label>Item Name:</label>
+                    <input type="text" id="editItemName" required>
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="editDescription" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Status:</label>
+                    <select id="editStatus">
+                        <option value="active">Active</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="archived">Archived</option>
+                    </select>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; University Lost & Found. All rights reserved.</p>
+        <p>Contact: lostfound@university.edu</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
